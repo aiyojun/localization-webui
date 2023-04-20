@@ -4,9 +4,15 @@ import * as fs from "fs"
 import axios from "axios"
 
 export const exec_main = () => {
-    console.info(app)
+    const argv = process.argv.slice(2)
+    let configPath = path.join(__dirname, '../local.config.json')
+    argv.forEach(arg => {
+        if (arg.indexOf('--config=') !== -1) {
+            configPath = arg.substring(9)
+        }
+    })
 
-    const config = JSON.parse(fs.readFileSync(path.join(__dirname, '../local.config.json')).toString())
+    const config = JSON.parse(fs.readFileSync(configPath).toString())
 
     let win
 
