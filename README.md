@@ -14,4 +14,4 @@ npm run serve
 
 Then, you will get:
 
-![local app]()
+![local app](./local-app.png)
