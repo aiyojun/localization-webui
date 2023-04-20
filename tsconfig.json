@@ -4,10 +4,10 @@
     "lib": [
       "es2021"
     ],
-    "module": "commonjs",
-    "declaration": true,
+    "module": "umd",
+    "declaration": false,
+    "allowJs": true,
     "moduleResolution": "Node",
-    "declarationDir": "./dist/types",
     "outDir": "./dist",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
