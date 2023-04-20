@@ -1,6 +1,6 @@
 {
   "name": "localize-webui",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Fast to localize Web UI by using electron.",
   "author": "aiyojun <aiyojun@gmail.com>",
   "homepage": "https://github.com/aiyojun/localize-webui",
