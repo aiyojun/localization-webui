@@ -1,0 +1,18 @@
+{
+  "project": {
+    "entry": "../example/index.html",
+    "icon": "../example/favicon.png"
+  },
+  "server": {
+    "host": "http://127.0.0.1:8000",
+    "prefix": "/api"
+  },
+  "app": {
+    "window": {
+      "width": 800,
+      "height": 600
+    },
+    "maximize": false,
+    "openDevTools": false
+  }
+}
