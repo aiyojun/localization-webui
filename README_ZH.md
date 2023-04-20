@@ -1,4 +1,4 @@
-# localization-webui
+# localize-webui
 
 > 使用electron快速本地化部署您开发的Web页面
 

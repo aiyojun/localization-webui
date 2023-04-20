@@ -1,5 +1,5 @@
 {
-  "name": "localization-webui",
+  "name": "localize-webui",
   "version": "1.0.0",
   "description": "Fast to localize Web UI by using electron.",
   "main": "dist/index.js",

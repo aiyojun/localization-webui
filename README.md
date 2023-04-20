@@ -1,4 +1,4 @@
-# localization-webui
+# localize-webui
 
 > Fast to localize Web UI by using electron.
 
