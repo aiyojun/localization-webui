@@ -2,11 +2,12 @@
 
 > Fast to localize Web UI by using electron.
 
-A simplest framework to make your web page localization.
+The simplest framework to make your web page localization. You don't have to care things related to electron.
 
 ## Usage
 
 ```shell
+npm install
 # Modify local.config.json, then run the command:
 npm run build
 npm run serve
