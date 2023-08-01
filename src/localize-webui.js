@@ -3,7 +3,7 @@
 const path  = require('path')
 const spawn = require('child_process').spawn;
 
-const child = spawn('npx', [`electron${process.platform === 'win32' ? '.cmd' : ''}`, path.join(__dirname, 'index.js'), ...process.argv.slice(2)], { stdio: 'inherit', windowsHide: false });
+const child = spawn(`electron${process.platform === 'win32' ? '.cmd' : ''}`, [path.join(__dirname, 'index.js'), ...process.argv.slice(2)], { stdio: 'inherit', windowsHide: false });
 
 child.on('close', function (code, signal) {
   if (code === null) {

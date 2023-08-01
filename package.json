@@ -23,16 +23,39 @@
   },
   "scripts": {
     "build": "tsc -p .",
+    "builder": "electron-builder",
+    "builder:dir": "electron-builder --dir",
     "serve": "electron dist/index.js --no-sandbox"
-  },
-  "bugs": {
-    "url": "https://github.com/aiyojun/localize-webui/issues"
   },
   "dependencies": {
     "axios": "^1.3.6"
   },
   "devDependencies": {
-    "electron": "^24.1.2",
-    "typescript": "^5.0.4"
+    "electron": "^23.1.3",
+    "electron-builder": "^23.6.0",
+    "localize-webui": "^1.0.3",
+    "typescript": "^5.1.3",
+    "electron-packager": "^17.1.1"
+  },
+  "build": {
+    "asar": false,
+    "files": [
+      "www/**/*",
+      "index.js",
+      "preload.js"
+    ],
+    "directories": {
+      "output": "dist/win-apk"
+    },
+    "win": {
+      "icon": "www/app.svg"
+    },
+    "nsis": {
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": false,
+      "shortcutName": "app"
+    }
   }
 }

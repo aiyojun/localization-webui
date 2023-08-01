@@ -1,7 +1,11 @@
-import { BrowserWindow, Menu, app, nativeImage, ipcMain } from 'electron'
+import { BrowserWindow, Menu, app, nativeImage, ipcMain, protocol, session } from 'electron'
 import * as path from "path"
 import * as fs from "fs"
 import axios from "axios"
+import {invoke} from "./git/git.runtime";
+
+
+process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 
 export const exec_main = () => {
     const argv = process.argv.slice(2)
@@ -13,6 +17,12 @@ export const exec_main = () => {
     })
 
     const config = JSON.parse(fs.readFileSync(configPath).toString())
+    let appPath = path.dirname(app.getAppPath())
+    // console.info(`app path : ${app.getAppPath()}`)
+    console.info(`app dirname : ${appPath}`)
+    console.info(`sessionData : ${app.getPath('sessionData')}`)
+
+
 
     let win
 
@@ -22,11 +32,23 @@ export const exec_main = () => {
             width: config.app.window.width,
             height: config.app.window.height,
             icon: config.project.icon,
+            titleBarStyle: 'hidden',
+            titleBarOverlay: {
+                color: "rgba(43,45,48,1)",
+                symbolColor: "#bbb",
+                height: 40
+            },
+            // frame: config.app.window.frame,
             webPreferences: {
-                preload: path.join(__dirname, 'preload.js')
+                preload: path.join(__dirname, 'preload.js'),
+                webSecurity: config.app.window.webSecurity,
             }
         })
-        win.loadFile(config.project.entry)
+        if (config.app.mode === 'online') {
+            win.loadURL(config.app.loadURL)
+        } else {
+            win.loadFile(config.project.entry)
+        }
         if (config.app.maximize) {
             win.maximize()
         }
@@ -35,7 +57,37 @@ export const exec_main = () => {
         }
     }
 
+    const proxy = config.server.host || ''
+    const prefix = config.server.host.prefix || ''
+    appPath = appPath.replaceAll('\\', '/') + '/build'
+    appPath = path.dirname(config.project.entry).replaceAll('\\', '/')
+
     app.whenReady().then(() => {
+        // if (config.app.mode === 'online')
+        session.defaultSession.webRequest.onBeforeRequest({urls: [
+                "file:///*"
+            ]}, (details, callback) => {
+            let url = details.url
+            const origin = url
+
+            url = url.replaceAll('\\', '/')
+            if (url.endsWith('index.html')) {
+                callback({})
+            } else if (url.indexOf('/assets') === -1) {
+                const newUrl = `${proxy}/${details.url.split(':///C:/')[1]}`
+                console.info(` -- redirect : ${origin} => ${newUrl}`)
+                callback({redirectURL: newUrl})
+            } else {
+                if (!url.startsWith(`file:///${appPath}/`)) {
+                    const newUrl = `file:///${appPath}/${details.url.split(':///C:/')[1]}`
+                    console.info(` -- redirect : ${origin} => ${newUrl}`)
+                    callback({redirectURL: newUrl})
+                } else {
+                    callback({})
+                }
+            }
+        })
+
         createWindow()
         app.on('activate', () => {
             if (BrowserWindow.getAllWindows().length === 0) {
@@ -49,8 +101,6 @@ export const exec_main = () => {
         }
     })
 
-    const proxy = config.server.host || ''
-    const prefix = config.server.host.prefix || ''
 
     if (proxy !== '') {
         ipcMain.on('http', (e, [method, url, data]) => {
@@ -64,6 +114,13 @@ export const exec_main = () => {
             }
         })
     }
+
+
+    ipcMain.on('rpc', (e, [method, args]) => {
+        invoke(method, args)
+            .then(r => win.webContents.send('rpc', r))
+            .catch(e => win.webContents.send('rpc', e))
+    })
 
     console.info(`[App] Web UI Localization`)
     console.info(`[App] Web project: ${config.project.entry}`)

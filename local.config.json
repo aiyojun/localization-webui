@@ -1,18 +1,22 @@
 {
   "project": {
-    "entry": "../example/index.html",
-    "icon": "../example/favicon.png"
+    "entry": "C:\\gitlab\\webui-lib-vue3\\dist\\index.html",
+    "icon": "C:\\gitlab\\webui-lib-vue3\\dist\\vite.svg"
   },
   "server": {
-    "host": "http://127.0.0.1:8000",
-    "prefix": "/api"
+    "host": "http://127.0.0.1:8080",
+    "prefix": ""
   },
   "app": {
+    "mode": "",
+    "loadURL": "http://127.0.0.1:3008",
     "window": {
-      "width": 800,
-      "height": 600
+      "width": 900,
+      "height": 600,
+      "frame": false,
+      "webSecurity": false
     },
     "maximize": false,
-    "openDevTools": false
+    "openDevTools": true
   }
 }
