@@ -30,20 +30,34 @@ export class GitChange {
             .map(diffText => GitChange.parse(diffText))
     }
     static parse(text: string) {
-        const lines = text.split('\n')
-        const filepath = lines[0].split(' ').pop().substring(2)
-        let flag = ''
-        if (!lines[1].startsWith('index ')) {
-            if (lines[1].indexOf('new file') > -1) flag = 'new file'
-            else if (lines[1].indexOf('deleted') > -1) flag = 'deleted'
-            else
-                flag = lines[1].substring(0, lines[1].indexOf(' mode'))
-            lines.splice(1, 1)
+        const extractFlag = (_text: string) => {
+            let flag = 'modified'
+            if (_text.indexOf('\nnew file') > -1) flag = 'new file'
+            else if (_text.indexOf('\ndeleted') > -1) flag = 'deleted'
+            else if (_text.indexOf('\nrename') > -1) flag = 'rename'
+            else if (_text.indexOf(' mode ') > -1)
+                flag = _text.split(' mode ')[0].split('\n').pop()
+            return flag
         }
-        flag = flag === '' ? 'modified' : flag
-        const gd = new GitChange(flag, filepath)
+        if (!text.startsWith('diff '))
+            throw new Error(`Unsolved diff text: ${text}`)
+        if (text.indexOf('\n--- ') === -1) {
+            if (text.toLowerCase().indexOf('\nbinary files') === -1)
+                throw new Error(`Unsolved diff text: ${text}`)
+            const filepath = text.split('\n')[0].split(' ').pop().substring(2)
+            return new GitChange(extractFlag(text), filepath)
+        }
+        const [section0, section_0] = text.split('\n--- ')
+        // console.info(`parse one diff : ${text}`)
+        console.info(`section_0 : ${section_0}`)
+        const [_, section_1] = section_0.split('\n+++ ')
+        const [__, ...lines] = section_1.split('\n')
 
-        let lineNum = 4
+        const section_head = section0.split('\n')
+        const filepath = section_head[0].split(' ').pop().substring(2)
+        const gd = new GitChange(extractFlag(section0), filepath)
+
+        let lineNum = 0
         let ss = ''
         let location = ''
         while (lineNum < lines.length) {
@@ -97,7 +111,7 @@ export function mapChangeColor(flag: string) {
     const handles = [
         {satisfy: () => flag === 'modified', entry: () => '#ff832e'},
         {satisfy: () => flag === 'new file', entry: () => '#00a6ff'},
-        {satisfy: () => flag === 'renamed', entry: () => '#51e7ad'},
+        {satisfy: () => flag.indexOf('rename') > -1, entry: () => '#51e7ad'},
         {satisfy: () => flag.indexOf('deleted') > -1, entry: () => '#ff5757'},
         {satisfy: () => flag === 'M', entry: () => 'orange'},
         {satisfy: () => flag === 'D', entry: () => 'red'},
@@ -120,7 +134,7 @@ export function mapChangeIcon(flag: string) {
     const handles = [
         {satisfy: () => flag === 'modified', entry: () => 'edit'},
         {satisfy: () => flag === 'new file', entry: () => 'file-add'},
-        {satisfy: () => flag === 'renamed', entry: () => 'file-export'},
+        {satisfy: () => flag.indexOf('rename') > -1, entry: () => 'file-rename'},
         {satisfy: () => flag.indexOf('delete') > -1, entry: () => 'file-delete'},
         {satisfy: () => flag === 'M', entry: () => 'edit'},
         {satisfy: () => flag === 'D', entry: () => 'file-delete'},

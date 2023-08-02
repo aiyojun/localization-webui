@@ -16,7 +16,13 @@
       "frame": false,
       "webSecurity": false
     },
+    "frame": {
+      "height": 35,
+      "backgroundColor": "#333",
+      "symbolColor": "#bbb",
+      "titleBarStyle": "hidden"
+    },
     "maximize": false,
-    "openDevTools": true
+    "openDevTools": false
   }
 }

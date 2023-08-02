@@ -5,14 +5,33 @@ import * as process from "node:process";
 import * as child_process from 'node:child_process'
 import {exists} from "./jlib";
 import {GitChange, GitCommit, GitUser} from "./git.generic";
+import {dialog, shell} from "electron"
 
 export function exec(cmd: string): Promise<string> {
     return new Promise((resolve, reject) => {
         child_process.exec(cmd,
             (error, stdout, stderr) => {
-            if (error) {reject(error);return;}
-            resolve(stdout);console.error(stderr)})
+                if (error) {reject(error);return;}
+                resolve(stdout);console.error(stderr)})
     })
+}
+
+export async function git_open_repo(): Promise<Array<string>> {
+    return (await dialog.showOpenDialog({
+        title: "GitGuard",
+        properties: ['openDirectory']
+    }))['filePaths']
+    // // Just for test
+    // return ["C:\\jqs\\dataflow"]
+}
+
+export function git_open_external(url: string) {
+    return shell.openExternal(url)
+}
+
+export function git_enter_repo(path) {
+    process.chdir(path)
+    return process.cwd() === path
 }
 
 export async function git_branch() {
@@ -56,7 +75,7 @@ export function enter(dir: string) {
 }
 
 export async function git_info() {
-    enter('C:\\gitlab\\widget-frontend')
+    // enter('C:\\gitlab\\widget-frontend')
 
     const br = await git_branch()
     const diffs = await git_diff()
@@ -75,6 +94,7 @@ export async function git_info() {
         "localBranches": br.branches,
         "remoteRepositories": await git_branch_r(),
         "history": await git_log(),
+        "track": await git_log('--all'),
         "changes": changes,
     }
 }
@@ -173,8 +193,8 @@ export function git_parse_config() {
     return r
 }
 
-export async function git_log(): Promise<Array<GitCommit>> {
-    const log = await exec(`git log --date=iso --pretty=format:%Creset+++%T%Creset+++%P%Creset+++%H%Creset+++%an%Creset+++%ae%Creset+++%ad%Creset+++%s`)
+export async function git_log(options: string=''): Promise<Array<GitCommit>> {
+    const log = await exec(`git log ${options} --date=iso --pretty=format:%Creset+++%T%Creset+++%P%Creset+++%H%Creset+++%an%Creset+++%ae%Creset+++%ad%Creset+++%s`)
     if (!log.startsWith('+++')) {
         console.error('error git log : ', log)
         return []
@@ -199,17 +219,24 @@ export async function git_show(id: string) {
     const message = await exec(`git show ${id}`)
     let i = 0; let count = 0;
     const diffs = []
-    // console.info(`git show .... ${message.length}`)
+    console.info(`\n\ngit show .... ${message.split('diff --git').length}\n\n`)
     while (i < message.length) {
-        const p = message.substring(i).indexOf('\ndiff ')
-        if (p === -1) break
-        const text = message.substring(i, i + p)
-        // if (text === '') break
-        count++
-        if (count !== 1) diffs.push(text)
-        i += p + 1
+        const p0 = message.substring(i).indexOf('\ndiff ')
+        const p1 = message.substring(i + p0 + 1).indexOf('\ndiff ')
+        if (p0 === -1) break
+        const text = ((p1 === -1) ? message.substring(i + p0 + 1) : message.substring(i + p0 + 1, i + p0 + 1 + p1));
+        console.info(`\ndiff : ${text}`)
+        diffs.push(text)
+        i = ((p1 === -1) ? message.length : (i + p0 + 1 + p1))
+        // const p = message.substring(i).indexOf('\ndiff ')
+        // if (p === -1) break
+        // const text = message.substring(i, i + p)
+        // // if (text === '') break
+        // count++
+        // if (count !== 1) diffs.push(text)
+        // i += p + 1
     }
-    // console.info("diffs :", diffs)
+    console.info(`\n\n\ndiff size : ${diffs.length}\n\n\n`)
     return diffs.map(d => GitChange.parse(d))
 }
 
@@ -416,6 +443,9 @@ export async function invoke(method: string, args: Array<any>) {
         {id: 'git_commit', hd: async (...args) => await git_commit(args[0])},
         {id: 'git_push', hd: async (...args) => await git_push()},
         {id: 'git_pull', hd: async (...args) => await git_pull()},
+        {id: 'git_open_repo', hd: async (...args) => await git_open_repo()},
+        {id: 'git_enter_repo', hd: async (...args) => git_enter_repo(args[0])},
+        {id: 'git_open_external', hd: (...args) => git_open_external(args[0])},
     ]
     for (let i = 0; i < rpcHandles.length; i++) {
         if (method === rpcHandles[i].id) {

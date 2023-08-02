@@ -32,11 +32,11 @@ export const exec_main = () => {
             width: config.app.window.width,
             height: config.app.window.height,
             icon: config.project.icon,
-            titleBarStyle: 'hidden',
+            titleBarStyle: config.app.frame.titleBarStyle,
             titleBarOverlay: {
-                color: "rgba(43,45,48,1)",
-                symbolColor: "#bbb",
-                height: 40
+                color: config.app.frame.backgroundColor,
+                symbolColor: config.app.frame.symbolColor,
+                height: config.app.frame.height
             },
             // frame: config.app.window.frame,
             webPreferences: {
