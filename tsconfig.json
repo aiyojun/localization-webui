@@ -2,15 +2,22 @@
   "compilerOptions": {
     "target": "es5",
     "lib": [
-      "es2021"
+      "ES2022"
     ],
-    "module": "umd",
+//    "module": "umd",
+//    "module": "ESNext",
     "declaration": false,
     "allowJs": true,
+//    "moduleResolution": "bundler",
     "moduleResolution": "Node",
     "outDir": "./dist",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+//    "noEmit": true,
+//    "emitDeclarationOnly": false,
+//    "allowImportingTsExtensions": true,
+
+
     "strict": false,
     "skipLibCheck": true,
     "paths": {

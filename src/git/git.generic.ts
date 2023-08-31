@@ -23,7 +23,6 @@ export class GitChange {
     }
 
     static parseDiffs(text: string): Array<GitChange> {
-        const files = []
         return text.split('\ndiff ')
             .filter(x => x.trim() !== '')
             .map((x, i) => i === 0 ? x : ('diff ' + x))
@@ -42,14 +41,10 @@ export class GitChange {
         if (!text.startsWith('diff '))
             throw new Error(`Unsolved diff text: ${text}`)
         if (text.indexOf('\n--- ') === -1) {
-            if (text.toLowerCase().indexOf('\nbinary files') === -1)
-                throw new Error(`Unsolved diff text: ${text}`)
             const filepath = text.split('\n')[0].split(' ').pop().substring(2)
             return new GitChange(extractFlag(text), filepath)
         }
         const [section0, section_0] = text.split('\n--- ')
-        // console.info(`parse one diff : ${text}`)
-        console.info(`section_0 : ${section_0}`)
         const [_, section_1] = section_0.split('\n+++ ')
         const [__, ...lines] = section_1.split('\n')
 
